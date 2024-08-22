@@ -1,0 +1,172 @@
+﻿@page "/"
+@inject NavigationManager NavigationManager
+<PageTitle>Home</PageTitle>
+
+<div class="container">
+	@* Advertisment Section *@
+	<div class="image-slider">
+
+		<div class="slider">
+
+			<img src="/images/ad2.jpeg" alt="Advertisement" />
+
+		</div>
+	</div>
+	<hr />
+
+	<!-- Premium Calculation Section -->
+
+	<div class="premium-calculation-section">
+
+		<div class="left">
+
+			<!-- Add more images as needed -->
+
+			<img src="/images/MedIn.jpg" />
+
+
+		</div>
+
+		<div class="right">
+
+			<h2>We have the answer to your happy and secure future</h2>
+
+			<p>Health plans for every stage of your life.</p>
+
+
+
+			<form class="premium-form" method="get">
+
+				<div class="form-group">
+
+					<label for="name">Name</label>
+
+					<input type="text" id="name" class="form-control" placeholder="Enter Name">
+
+				</div>
+
+				<div class="form-group">
+
+					<label for="mobile">Mobile</label>
+
+					<input type="tel" id="mobile" class="form-control" placeholder="Enter Mobile Number">
+
+				</div>
+
+				<div class="form-group">
+
+					<label for="pincode">Pincode</label>
+
+					<input type="text" id="pincode" class="form-control" placeholder="Enter Pincode">
+
+				</div>
+
+				<button type="submit" class="btn btn-danger" @onclick="NavigateToPremiumCalc">Get Quote</button>
+			  
+			</form>
+
+		</div>
+
+	</div>
+
+
+
+	@code {
+		private void NavigateToPremiumCalc()
+		{
+			NavigationManager.NavigateTo("/PremiumCalc");
+		}
+
+
+
+	}
+
+	<style>
+		.image-slider {
+			position: relative;
+			width: 100%;
+			overflow: hidden;
+		}
+
+		.slider {
+			display: flex;
+			width: 100%;
+		}
+
+
+
+
+		.container {
+			padding: 20px;
+		}
+
+		.premium-calculation-section {
+			display: flex;
+			justify-content: space-between;
+			margin-top: 40px;
+		}
+
+			.premium-calculation-section .left {
+				width: 50%;
+			}
+
+			.premium-calculation-section .right {
+				width: 45%;
+			}
+
+			.premium-calculation-section h2 {
+				font-size: 1.8rem;
+				margin-bottom: 10px;
+			}
+
+			.premium-calculation-section p {
+				font-size: 1.2rem;
+				margin-bottom: 20px;
+			}
+
+		.plan-options {
+			margin-bottom: 20px;
+		}
+
+			.plan-options .btn {
+				margin-right: 10px;
+			}
+
+		.premium-form .form-group {
+			margin-bottom: 15px;
+		}
+
+		.premium-form .form-control {
+			width: 100%;
+			padding: 10px;
+			font-size: 1rem;
+		}
+
+		.premium-form .btn-danger {
+			width: 100%;
+			padding: 10px;
+		}
+
+		.premium-calculation-section h2 {
+			font-family: 'Poppins', sans-serif; /* Change to a custom font */
+			font-weight: 700; /* Bold font */
+			font-size: 2rem; /* Adjust size */
+			color: #00008B; /* Darker color */
+			letter-spacing: 1px; /* Slight spacing between letters */
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+			margin-bottom: 15px;
+		}
+
+		.premium-calculation-section p {
+			font-family: 'Roboto', sans-serif; /* Change to a custom font */
+			font-weight: 400; /* Regular weight */
+			font-size: 1.2rem; /* Adjust size */
+			color: red; /* Slightly lighter color */
+			line-height: 1.6; /* Space between lines */
+			letter-spacing: 0.5px; /* Slight spacing between letters */
+			margin-bottom: 20px;
+		}
+
+	</style>
+
+</div>

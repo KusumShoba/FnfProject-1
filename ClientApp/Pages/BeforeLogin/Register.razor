@@ -1,0 +1,65 @@
+﻿@page "/register"
+
+@using System.ComponentModel.DataAnnotations
+@using InsuranceApi.DTOs
+@inject NavigationManager nav
+@inject IJSRuntime js
+@using ClientApp.Services 
+@inject IPolicyHolderDtoService PolicyHolderService
+
+<h3 class="page-title">Create a New Account</h3>
+
+<img src="/images/image.png" alt="Medical Insurance" style="width:60vh; float:left; margin-right:20px" />
+
+<div class="form-container">
+    <EditForm Model="registerModel" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="Name">Name</label>
+            <InputText id="Name" class="form-control" @bind-Value="registerModel.Name" />
+            <ValidationMessage For="@(() => registerModel.Name)" />
+        </div>
+
+        <div class="form-group">
+            <label for="Phone">Phone Number</label>
+            <InputText id="Phone" class="form-control" @bind-Value="registerModel.Phone" />
+            <ValidationMessage For="@(() => registerModel.Phone)" />
+        </div>
+
+        <div class="form-group">
+            <label for="Email">Email</label>
+            <InputText id="Email" class="form-control" @bind-Value="registerModel.Email" />
+            <ValidationMessage For="@(() => registerModel.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label for="Password">Password</label>
+            <InputText id="Password" type="password" class="form-control" @bind-Value="registerModel.PasswordHash" />
+            <ValidationMessage For="@(() => registerModel.PasswordHash)" />
+        </div>
+
+        <div class="form-group">
+            <label for="Address">Address</label>
+            <InputText id="Address" class="form-control" @bind-Value="registerModel.Address" />
+            <ValidationMessage For="@(() => registerModel.Address)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Register</button>
+    </EditForm>
+</div>
+
+@code {
+    private PolicyHolderDto registerModel = new PolicyHolderDto();
+
+    private async Task HandleValidSubmit()
+    {
+        // Here you call the service to add the policy holder
+        await PolicyHolderService.Add(registerModel);
+
+        // Optionally, you can show a success message or navigate to another page
+        await js.InvokeVoidAsync("alert", "Registration successful!");
+        nav.NavigateTo("/Login");
+    }
+}

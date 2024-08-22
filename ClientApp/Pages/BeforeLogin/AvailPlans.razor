@@ -1,0 +1,50 @@
+﻿@page "/AvailPlans"
+@* @using ClientApp.Models
+@using ClientApp.Services
+@inject InsurancePlanService PlanService
+@inject NavigationManager NavigationManager
+@using Newtonsoft.Json
+@using Microsoft.AspNetCore.WebUtilities
+
+<h3>Available Insurance Plans</h3>
+
+@if (availablePlans != null && availablePlans.Any())
+{
+    <div class="plans-container">
+        @foreach (var plan in availablePlans)
+        {
+            <div class="plan-card">
+                <h4>@plan.PlanName</h4>
+                <p>@plan.Description</p>
+                <p>Premium: @plan.Premium.ToString("C")</p>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>No plans available for the given criteria.</p>
+}
+
+@code {
+    private List<InsurancePlan> availablePlans;
+
+
+    private List<FamilyMember> familyMembers;
+
+    protected override void OnInitialized()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("members", out var serializedMembers))
+        {
+            familyMembers = JsonConvert.DeserializeObject<List<FamilyMember>>(System.Web.HttpUtility.UrlDecode(serializedMembers));
+        }
+     
+
+        // Use familyMembers to filter or retrieve plans
+    }
+}
+}
+ *@

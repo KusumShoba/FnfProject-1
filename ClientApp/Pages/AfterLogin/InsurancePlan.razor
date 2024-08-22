@@ -1,0 +1,30 @@
+﻿@page "/Insurance"
+@using InsuranceApi.DTOs
+@using ClientApp.Services
+@inject IInsuranceTypeDtoService service;
+
+<h3>Insurance Policies</h3>
+
+@if (InsuranceTypes == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <ul>
+        @foreach (var insuranceType in InsuranceTypes)
+        {
+            <li>
+            <h4>@insuranceType.InsuranceType</h4>
+                <p>@insuranceType.Description</p>
+            </li>
+        }
+    </ul>
+}
+
+
+@code {
+    private List<InsuranceTypeDto> InsuranceTypes;
+
+   protected override async Task OnInitializedAsync() => InsuranceTypes = (await service.GetAll()).ToList();
+}

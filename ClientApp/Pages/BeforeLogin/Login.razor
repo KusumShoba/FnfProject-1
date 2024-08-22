@@ -1,0 +1,102 @@
+﻿@page "/Login"
+@inject HttpClient httpClient
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+<h3 class="page-title">Login to Your Account</h3>
+
+
+<img src="/images/image.png" alt="Medical Insurance" style="width:60vh; float:left; margin-right:20px" />
+
+
+<div class="form-container">
+    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="card-login">
+            <div class="card-body">
+
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+                    <ValidationMessage For="@(() => loginModel.Email)" />
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+                    <ValidationMessage For="@(() => loginModel.Password)" />
+                </div>
+
+                <div class="otp-section mt-4">
+                    <h3>OR</h3>
+                    <h5 class="otp-title">Login with OTP</h5>
+
+                    <div class="form-group">
+                        <label for="otp">Enter 4-Digit OTP</label>
+                        <InputText id="otp" class="form-control" maxlength="4" @bind-Value="loginModel.otp" />
+                        <ValidationMessage For="@(() => loginModel.otp)" />
+                    </div>
+                    @* <button type="submit" class="btn btn-secondary">Login with OTP</button> *@
+
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-4">Login</button>
+
+                <p class="text-lg-end mt-4">
+                    Don't have an account? <a href="/register">Register here</a>
+                </p>
+
+            </div>
+        </div>
+    </EditForm>
+
+    <style>
+        html, body {
+            /*font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;*/
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: auto;
+            /*background: url('./BackgroundImage.png') no-repeat center center fixed;*/
+            background-color: lightcyan;
+            height: 100vh;
+            color: #333;
+        }
+    </style>
+</div>
+
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+
+    private async Task HandleLogin()
+    {
+        // Send the login data to the API for authentication
+        var response = await httpClient.PostAsJsonAsync("auth/login", loginModel);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var token = await response.Content.ReadAsStringAsync();
+            // Store the token (e.g., in local storage, session storage, or a cookie)
+            await js.InvokeVoidAsync("localStorage.setItem", "authToken", token);
+
+            // Navigate to a different page (e.g., dashboard)
+            nav.NavigateTo("/dashboard");
+        }
+        else
+        {
+            // Display an error message
+            await js.InvokeVoidAsync("alert", "Invalid login credentials. Please try again.");
+        }
+    }
+
+    private class LoginModel
+    {
+        
+        public string Email { get; set; }
+
+        
+        public string Password { get; set; }
+
+        public string otp { get; set; }
+    }
+}

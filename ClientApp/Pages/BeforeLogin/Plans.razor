@@ -1,0 +1,149 @@
+﻿@page "/Plans"
+@inject NavigationManager Navigation
+
+<h3>Insurance Ploicies</h3>
+
+<div class="card-carousel">
+    <div class="card-wrapper">
+        <button class="nav-button" @onclick="ShowPreviousCards" disabled="@(CurrentCardIndex == 0)">&lt;</button>
+
+
+        @foreach (var card in VisibleCards)
+        {
+            <div class="card" @onclick="() => NavigateToCardDetails(card.Id)">
+                <div class="card-body">
+                    <h5 class="card-title">@card.Title</h5>
+                    <p class="card-text">@card.Content</p>
+                </div>
+            </div>
+        }
+
+        <button class="nav-button" @onclick="ShowNextCards" disabled="@(CurrentCardIndex >= MaxCardIndex)">&gt;</button>
+
+
+    </div>
+    <style>
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: right;
+            height: 100vh;
+        }
+
+
+        .form-container {
+            flex: 2;
+            display: flex;
+            justify-content: right;
+        }
+
+        .card-carousel {
+            display: flex;
+            align-items: center;
+        }
+
+        .card-wrapper {
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            overflow: hidden;
+            width: 80%;
+        }
+
+        .card {
+            width: 28rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card-login {
+            width: 28rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+            justify-content: left;
+        }
+
+        .card:hover {
+            transform: scale(1.1);
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 15px;
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            margin-bottom: 10px;
+        }
+
+        .card-text {
+            font-size: 1rem;
+            color: #333;
+        }
+    </style>
+</div>
+
+@code {
+    private List<CardItem> AllCards = new List<CardItem>();
+    private List<CardItem> VisibleCards = new List<CardItem>();
+    private int CurrentCardIndex = 0;
+    private int CardsPerPage = 2;
+    private int MaxCardIndex = 10;
+
+    protected override void OnInitialized()
+    {
+        // Initialize 50 cards with dummy content
+        for (int i = 1; i <= 10; i++)
+        {
+            AllCards.Add(new CardItem
+                {
+                    Id = i,
+                    Title = $"Insurance {i}",
+                    Content = $"This is the content of Insurance {i} ........."
+                });
+        }
+
+        UpdateVisibleCards();
+    }
+
+    private void ShowNextCards()
+    {
+        if (CurrentCardIndex < MaxCardIndex - 1)
+        {
+            CurrentCardIndex++;
+            UpdateVisibleCards();
+        }
+    }
+
+    private void ShowPreviousCards()
+    {
+        if (CurrentCardIndex > 0)
+        {
+            CurrentCardIndex--;
+            UpdateVisibleCards();
+        }
+    }
+
+    private void UpdateVisibleCards()
+    {
+        VisibleCards = AllCards.Skip(CurrentCardIndex).Take(CardsPerPage).ToList();
+        //VisibleCards = AllCards.Skip(CurrentCardIndex * CardsPerPage).Take(CardsPerPage).ToList();
+    }
+
+    private void NavigateToCardDetails(int cardId)
+    {
+        Navigation.NavigateTo($"/carddetails/{cardId}");
+    }
+
+    private class CardItem
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+    }
+}
