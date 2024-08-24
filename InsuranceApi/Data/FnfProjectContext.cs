@@ -23,9 +23,13 @@ public partial class FnfProjectContext : DbContext
 
     public virtual DbSet<Hospital> Hospitals { get; set; }
 
+    public virtual DbSet<Illness> Illnesses { get; set; }
+
     public virtual DbSet<InsuranceType> InsuranceTypes { get; set; }
 
     public virtual DbSet<Insured> Insureds { get; set; }
+
+    public virtual DbSet<InsuredIllness> InsuredIllnesses { get; set; }
 
     public virtual DbSet<InsuredPolicy> InsuredPolicies { get; set; }
 
@@ -35,9 +39,11 @@ public partial class FnfProjectContext : DbContext
 
     public virtual DbSet<PolicyHolder> PolicyHolders { get; set; }
 
+    public virtual DbSet<Table> Tables { get; set; }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=FNFIDVPRE20502\\SQL2022; Database=FnfProject; Trusted_Connection=True; TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Server=FNFIDVPRE20502\\SQL2022;Database=FnfProject;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -126,6 +132,16 @@ public partial class FnfProjectContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<Illness>(entity =>
+        {
+            entity.HasKey(e => e.IllnessId).HasName("PK__Illness__2BA575BB587A2A30");
+
+            entity.ToTable("Illness");
+
+            entity.Property(e => e.IllnessId).ValueGeneratedNever();
+            entity.Property(e => e.Name).HasMaxLength(255);
+        });
+
         modelBuilder.Entity<InsuranceType>(entity =>
         {
             entity.HasKey(e => e.InsuranceId).HasName("PK__Insuranc__74231BC42AFC2B2C");
@@ -133,6 +149,7 @@ public partial class FnfProjectContext : DbContext
             entity.ToTable("InsuranceType");
 
             entity.Property(e => e.InsuranceId).HasColumnName("InsuranceID");
+            entity.Property(e => e.BaseRate).HasColumnType("decimal(18, 0)");
             entity.Property(e => e.InsuranceType1)
                 .HasMaxLength(255)
                 .IsUnicode(false)
@@ -159,6 +176,25 @@ public partial class FnfProjectContext : DbContext
                 .HasForeignKey(d => d.PolicyHolderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Insured__PolicyH__4F7CD00D");
+        });
+
+        modelBuilder.Entity<InsuredIllness>(entity =>
+        {
+            entity.HasKey(e => e.InsuredIllnessId).HasName("PK__InsuredI__67B6BDAB7AAAB21E");
+
+            entity.ToTable("InsuredIllness");
+
+            entity.Property(e => e.InsuredIllnessId).ValueGeneratedNever();
+
+            entity.HasOne(d => d.Illness).WithMany(p => p.InsuredIllnesses)
+                .HasForeignKey(d => d.IllnessId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__InsuredIl__Illne__7A672E12");
+
+            entity.HasOne(d => d.Insured).WithMany(p => p.InsuredIllnesses)
+                .HasForeignKey(d => d.InsuredId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK__InsuredIl__Insur__797309D9");
         });
 
         modelBuilder.Entity<InsuredPolicy>(entity =>
@@ -242,6 +278,8 @@ public partial class FnfProjectContext : DbContext
 
             entity.ToTable("PolicyHolder");
 
+            entity.HasIndex(e => e.Email, "UC_Email").IsUnique();
+
             entity.Property(e => e.PolicyHolderId).HasColumnName("PolicyHolderID");
             entity.Property(e => e.Email).HasMaxLength(255);
             entity.Property(e => e.Name).HasMaxLength(50);
@@ -251,6 +289,15 @@ public partial class FnfProjectContext : DbContext
                 .IsUnicode(false)
                 .IsFixedLength();
             entity.Property(e => e.Status).HasDefaultValue(1);
+        });
+
+        modelBuilder.Entity<Table>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__Table__3214EC07356B6AB2");
+
+            entity.ToTable("Table");
+
+            entity.Property(e => e.Id).ValueGeneratedNever();
         });
 
         OnModelCreatingPartial(modelBuilder);

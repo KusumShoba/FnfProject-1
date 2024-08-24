@@ -1,7 +1,221 @@
-﻿@page "/PlansDetail"
-<h3>Plans</h3>
+﻿@page "/PlansDetailAfter/{Id:int}"
+@using ClientApp.Services
+@using InsuranceApi.DTOs
+@inject IInsuranceTypeDtoService InsuranceService
+
+@inject IInsuredDtoService service
+
+@inject NavigationManager nav
+@inject IJSRuntime js
+<div class="card mt-4">
+	<div class="card-header">
+		Insurance Plan
+	</div>
+	<div class="card-body">
+
+		<EditForm Model="@premiumModel" OnValidSubmit="@HandleValidSubmit">
+
+			<DataAnnotationsValidator />
+
+			<ValidationSummary />
+
+			<!-- Number of Members Input -->
+			<div class="form-group">
+				<label for="numMembers">Number of Members:</label>
+				<InputNumber id="numMembers" class="form-control" @bind-Value="premiumModel.NumberOfMembers" />
+				<ValidationMessage For="@(() => premiumModel.NumberOfMembers)" />
+			</div>
+
+
+		@* 	<!-- Age Input -->
+			<div class="form-group">
+				<label for="age">Age:</label>
+				<InputNumber id="age" class="form-control" @bind-Value="premiumModel.Age" />
+				<ValidationMessage For="@(() => premiumModel.Age)" />
+			</div> *@
+
+			<!-- Coverage Type Selection -->
+			<div class="form-group">
+				<label for="coverageType">Coverage Type:</label>
+				<InputSelect id="coverageType" class="form-control" @bind-Value="premiumModel.CoverageType">
+					<option value="">Select Coverage Type</option>
+					<option value="Bronze">Bronze 3 Lakh</option>
+					<option value="Silver">Silver 6 Lakh</option>
+					<option value="Gold">Gold 9 Lakh</option>
+				</InputSelect>
+				<ValidationMessage For="@(() => premiumModel.CoverageType)" />
+			</div>
+
+
+
+			<!-- Insured Details Form -->
+			@if (insuredDetailsList != null)
+			{
+				@if (premiumModel.NumberOfMembers > premiumModel.CoverageSize)
+				{
+					// Handle validation error
+					js.InvokeVoidAsync("alert", "Number Of Members Exceeding the coverage size..");
+				}
+				else
+				{
+
+
+
+					@for (int i = 0; i < premiumModel.NumberOfMembers; i++)
+					{
+						var insured = insuredDetailsList[i];
+						<div class="form-group">
+							<label for="@($"insuredName_{i}")">Insured Name:</label>
+							<InputText id="@($"insuredName_{i}")" class="form-control" @bind-Value="insured.Name" />
+							<ValidationMessage For="@(() => insured.Name)" />
+
+							<label for="@($"dob_{i}")">Date of Birth:</label>
+							<InputDate id="@($"dob_{i}")" class="form-control" @bind-Value="insured.Dob" />
+							<ValidationMessage For="@(() => insured.Dob)" />
+
+							<label for="@($"gender_{i}")">Gender:</label>
+							<InputSelect id="@($"gender_{i}")" class="form-control" @bind-Value="insured.Gender">
+								<option value="">Select Gender</option>
+								<option value="Male">Male</option>
+								<option value="Female">Female</option>
+							</InputSelect>
+							<ValidationMessage For="@(() => insured.Gender)" />
+							<!-- Health Factors Checklist -->
+							<div class="form-group">
+								<label>Health Factors:</label>
+								<div>
+									@foreach (var healthFactor in healthFactors)
+									{
+										<div>
+											<InputCheckbox @bind-Value="healthFactor.IsSelected" /> @healthFactor.Name
+										</div>
+									}
+								</div>
+							</div>
+						</div>
+						<hr />
+					}
+				}
+			}
+
+			<!-- Submit Button -->
+			<button type="submit" class="btn btn-primary">Check Premium</button>
+			<button type="submit" class="btn btn-success" @onclick="()=>NextPage(InsuranceType.InsuranceId)">Buy Plan</button>
+		</EditForm>
+
+	</div>
+</div>
+@if (calculatePremium.HasValue)
+{
+	<div class="alert alert-info" mt-3>
+		Estimated Premium: @calculatePremium.Value.ToString("C");
+	</div>
+}
 
 @code {
+	[Parameter] public int Id { get; set; }
+	private PremiumModel premiumModel = new PremiumModel();
+	private InsuranceTypeDto? InsuranceType;
+	private List<InsuredDto> insuredDetailsList = new List<InsuredDto>();
+	private List<HealthFactor> healthFactors = new List<HealthFactor>();
+	private decimal? calculatePremium;
+	protected override async Task OnInitializedAsync()
+	{
+		InsuranceType = await InsuranceService.GetById(Id);
+		if (InsuranceType != null)
+		{
+			premiumModel.BaseRate = InsuranceType.BaseRate ?? 0m;
+			premiumModel.CoverageSize = InsuranceType.CoverageSize ?? 0;
+			UpdateInsuredDetails();
+		}
+
+		InitializeHealthFactors();
+	}
+
+	private void InitializeHealthFactors()
+	{
+		healthFactors = new List<HealthFactor>
+		{
+			new HealthFactor { Name = "Diabetes", Value = 0.02m },
+			new HealthFactor { Name = "Cholesterol", Value = 0.02m },
+			new HealthFactor { Name = "Heart Disease", Value = 0.02m },
+			new HealthFactor { Name = "Asthma", Value = 0.02m },
+			new HealthFactor { Name = "Blood Pressure", Value = 0.02m },
+			new HealthFactor { Name = "Cancer", Value = 0.02m },
+			new HealthFactor { Name = "None", Value = 0.00m }
+		};
+	}
+
+	private void UpdateInsuredDetails()
+	{
+		insuredDetailsList = new List<InsuredDto>();
+		for (int i = 0; i < premiumModel.CoverageSize; i++)
+		{
+			insuredDetailsList.Add(new InsuredDto());
+		}
+
+	}
+
+	private async Task HandleValidSubmit()
+	{
 
 
+		
+		calculatePremium = CalculatePremium();
+		// Calculate premium amount and handle the submission logic
+
+		// Your logic to handle the submission, e.g., saving data or sending to an API
+		
+	}
+	private void NextPage(int insuranceTId)
+	{
+		// Ensure PolicyHolderId is set
+		foreach (var insured in insuredDetailsList)
+		{
+			insured.PolicyHolderId = Id; // or the relevant PolicyHolderId
+		}
+
+		// Save insured details
+		foreach (var insured in insuredDetailsList)
+		{
+			 service.Add(insured); // Ensure this method matches your service implementation
+		}
+		nav.NavigateTo($"/BuyPlan/{Id}/{insuranceTId}/{calculatePremium}");
+	}
+	private decimal CalculatePremium()
+	{
+		decimal coverageAmount = premiumModel.CoverageType switch
+		{
+			"Bronze" => 300000m,
+			"Silver" => 600000m,
+			"Gold" => 900000m,
+			_ => 0m
+		};
+
+		decimal healthFactorSum = healthFactors.Where(h => h.IsSelected).Sum(h => h.Value);
+
+		decimal premium = (((premiumModel.BaseRate + coverageAmount) / 100) +
+									(premiumModel.BaseRate) +
+									(healthFactorSum * premiumModel.BaseRate)) * premiumModel.NumberOfMembers;
+
+		return premium;
+	}
+
+	public class PremiumModel
+	{
+		public decimal BaseRate { get; set; }
+		public int NumberOfMembers { get; set; }
+		public int Age { get; set; }
+		public string CoverageType { get; set; } = string.Empty;
+		public int CoverageSize { get; set; }
+	}
+
+
+	public class HealthFactor
+	{
+		public string Name { get; set; } = string.Empty;
+		public decimal Value { get; set; }
+		public bool IsSelected { get; set; }
+	}
 }
+

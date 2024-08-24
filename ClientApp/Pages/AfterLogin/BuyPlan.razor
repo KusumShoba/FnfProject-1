@@ -1,0 +1,101 @@
+﻿@page "/BuyPlan/{PolicyHolderId:int}/{InsuranceId:int}/{PremiumAmount:decimal}"
+<h3>BuyPlan</h3>
+@using ClientApp.Services
+@using InsuranceApi.DTOs
+@inject IPolicyDtoService PolicyService
+@inject IPaymentDtoService PaymentService
+@inject IInsuranceTypeDtoService InsuranceTypeService
+@inject IPolicyHolderDtoService PolicyHolderService
+@inject NavigationManager Navigation
+
+<h3>Buy Plan</h3>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Policy Details</h5>
+
+        <div class="form-group">
+            <label>Policy Number:</label>
+            <input type="text" class="form-control" value="@policy.PolicyNumber" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Insurance Type:</label>
+            <input type="text" class="form-control" value="@insuranceType?.InsuranceType" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Policy Holder Name:</label>
+            <input type="text" class="form-control" value="@policyHolder?.Name" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Start Date:</label>
+            <input type="text" class="form-control" value="@policy.StartDate.ToShortDateString()" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>End Date:</label>
+            <input type="text" class="form-control" value="@policy.EndDate.ToShortDateString()" readonly />
+        </div>
+
+        <div class="form-group">
+            <label>Premium Amount:</label>
+            <input type="text" class="form-control" value="@policy.PremiumAmount" readonly />
+        </div>
+
+        <button class="btn btn-primary" @onclick="BuyPolicy">Buy</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int PolicyHolderId { get; set; }
+    [Parameter] public int InsuranceId { get; set; }
+    [Parameter]
+    public decimal PremiumAmount{ get; set; }
+
+    private PolicyDto policy = new PolicyDto();
+    private PolicyHolderDto policyHolder;
+    private InsuranceTypeDto insuranceType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        insuranceType = await InsuranceTypeService.GetById(InsuranceId);
+        policyHolder = await PolicyHolderService.GetById(PolicyHolderId);
+
+        if (insuranceType != null && policyHolder != null)
+        {
+            // Generate Policy Number
+            policy.PolicyNumber = GeneratePolicyNumber(policyHolder.PolicyHolderId, insuranceType.InsuranceId);
+            policy.InsuranceTypeId = insuranceType.InsuranceId;
+            policy.StartDate = DateTime.Today;
+            policy.EndDate = DateTime.Today.AddYears(1);
+            policy.PremiumAmount = PremiumAmount;
+        }
+    }
+
+    private string GeneratePolicyNumber(int insuredId, int insuranceId)
+    {
+        return $"{insuredId.ToString("D3")}{insuranceId.ToString("D3")}";
+    }
+
+    private async Task BuyPolicy()
+    {
+        // Save Policy
+        await PolicyService.Add(policy);
+
+        // Save Payment
+        var payment = new PaymentDto
+            {
+                InsuredPolicyId = policy.PolicyId, // Assuming it's set by the database or service after adding
+                PolicyHolderId = PolicyHolderId,
+                PaymentAmount = policy.PremiumAmount,
+                PaymentDate = DateTime.Now
+            };
+
+        await PaymentService.Add(payment);
+
+        // Redirect or show confirmation
+        Navigation.NavigateTo("/confirmation");
+    }
+}

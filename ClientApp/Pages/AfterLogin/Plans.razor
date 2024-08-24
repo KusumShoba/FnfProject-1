@@ -1,4 +1,4 @@
-﻿@page "/PlansBefore"
+﻿@page "/PlansAfter"
 @inject NavigationManager Navigation
 @using ClientApp.Services
 @inject IInsuranceTypeDtoService service;
@@ -148,7 +148,7 @@
     private void NavigateToCardDetails(int cardId)
     {
         Navigation.NavigateTo($"/carddetails/{cardId}");
-        Navigation.NavigateTo($"/PlansDetailBefore/{cardId}");
+        Navigation.NavigateTo($"/PlansDetailAfter/{cardId}");
     }
 
     private class CardItem

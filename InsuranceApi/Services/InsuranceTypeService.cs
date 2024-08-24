@@ -86,6 +86,8 @@ namespace InsuranceApi.Services
                 InsuranceId = insuranceTypeTable.InsuranceId,
                 InsuranceType = insuranceTypeTable.InsuranceType1,
                 Description = insuranceTypeTable.Description,
+                BaseRate = insuranceTypeTable.BaseRate,
+                CoverageSize = insuranceTypeTable.CoverageSize,
             };
             return insuranceTypeDto;
         }
@@ -95,6 +97,8 @@ namespace InsuranceApi.Services
             insuranceTypeTable.InsuranceId = insuranceTypeDto.InsuranceId;
             insuranceTypeTable.InsuranceType1 = insuranceTypeDto.InsuranceType;
             insuranceTypeTable.Description = insuranceTypeDto.Description;
+            insuranceTypeTable.BaseRate = insuranceTypeDto.BaseRate;
+            insuranceTypeTable.CoverageSize = insuranceTypeDto.CoverageSize;
             return;
         }
     }

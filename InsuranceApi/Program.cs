@@ -1,4 +1,3 @@
-
 using InsuranceApi.Data;
 using InsuranceApi.Services;
 using Microsoft.EntityFrameworkCore;
@@ -19,11 +18,10 @@ namespace InsuranceApi
                     setUp.AllowAnyOrigin();
                 });
             });
-
             // Add services to the container.
             builder.Services.AddDbContext<FnfProjectContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("FnfTraining"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("FnfProject"));
             });
             builder.Services.AddTransient<IAdminService, AdminService>();
             builder.Services.AddTransient<IInsuredPolicyService, InsuredPolicyService>();
@@ -35,6 +33,10 @@ namespace InsuranceApi
             builder.Services.AddTransient<IPolicyService, PolicyService>();
             builder.Services.AddTransient<IInsuredService, InsuredService>();
             builder.Services.AddTransient<IHospitalService, HospitalService>();
+            builder.Services.AddTransient<IIllnessService, IllnessService>();
+            builder.Services.AddTransient<IInsuredIllnessService, InsuredIllnessService>();
+    
+
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -49,7 +51,6 @@ namespace InsuranceApi
                 app.UseSwaggerUI();
             }
             app.UseCors("cors");
-
             app.UseAuthorization();
 
 
@@ -59,4 +60,3 @@ namespace InsuranceApi
         }
     }
 }
-

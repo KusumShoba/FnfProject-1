@@ -1,27 +1,28 @@
 ﻿using InsuranceApi.Data;
 using InsuranceApi.DTOs;
 using InsuranceApi.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace InsuranceApi.Controllers
 {
-    public interface IBlacklistController
+    public interface IIllnessController
     {
-        Task<IActionResult> Add(BlacklistDto blacklistDto);
+        Task<IActionResult> Add(IllnessDto admin);
         Task<IActionResult> Delete(int id);
         Task<IActionResult> GetAll();
         Task<IActionResult> GetById(int id);
-        Task<IActionResult> Update(BlacklistDto blacklistDto);
+        Task<IActionResult> Update(IllnessDto admin);
     }
-
+    [EnableCors("cors")]
     [Route("api/[controller]")]
     [ApiController]
-    public class BlacklistController : ControllerBase, IBlacklistController
+    public class IllnessController : ControllerBase, IIllnessController
     {
-        private readonly IBlacklistService service;
-        public BlacklistController(IBlacklistService service)
+        private readonly IIllnessService service;
+        public IllnessController(IIllnessService service)
         {
             this.service = service;
         }
@@ -29,8 +30,8 @@ namespace InsuranceApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            List<BlacklistDto> blacklists = await service.GetAll();
-            return Ok(blacklists);
+            List<IllnessDto> admins = await service.GetAll();
+            return Ok(admins);
         }
 
         [HttpDelete]
@@ -49,18 +50,18 @@ namespace InsuranceApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(BlacklistDto blacklist)
+        public async Task<IActionResult> Add(IllnessDto admin)
         {
-            await service.Add(blacklist);
-            return Ok();
+                await service.Add(admin);
+                return Ok();
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(BlacklistDto blacklist)
+        public async Task<IActionResult> Update(IllnessDto admin)
         {
             try
             {
-                await service.Update(blacklist);
+                await service.Update(admin);
                 return Ok();
             }
             catch (NullReferenceException)

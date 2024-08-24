@@ -11,6 +11,9 @@ namespace InsuranceApi.Services
         Task<List<PolicyHolderDto>> GetAll();
         Task<PolicyHolderDto> GetById(int id);
         Task Update(PolicyHolderDto policyHolderDto);
+
+        Task<LoginDto> ValidateUser(string email, string password);
+        string GenerateToken(LoginDto user);
     }
 
     public class PolicyHolderService : IPolicyHolderService
@@ -105,5 +108,53 @@ namespace InsuranceApi.Services
             policyHolderTable.Status = policyHolderDto.Status;
             return;
         }
+        public async Task<LoginDto> ValidateUser(string email, string password)
+        {
+
+            // Fetch the user by email
+            var user = await context.PolicyHolders.Where(u => u.Email == email).FirstOrDefaultAsync();
+            if (user == null)
+            {
+                return null;
+            }
+           
+
+            // Verify the password (assuming passwords are stored as hashes)
+            if (user.PasswordHash!=password)
+            {
+                return null;
+            }
+            var userDTo = new LoginDto
+            {
+                
+                Email = user.Email,
+                
+
+            };
+            return userDTo;
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] storedHash)
+        {
+            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                for (int i = 0; i < computedHash.Length; i++)
+                {
+                    if (computedHash[i] != storedHash[i]) return false;
+                }
+            }
+            return true;
+        }
+
+
+        // Optional: Implement this method if you want to use JWT for authentication
+        public string GenerateToken(LoginDto user)
+        {
+            return null;
+            // Implementation for generating a JWT token
+        }
     }
+
 }
+

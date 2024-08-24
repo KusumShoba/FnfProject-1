@@ -1,7 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using System.Text.Json;
-
-namespace InsuranceApi.DTOs
+﻿namespace InsuranceApi.DTOs
 {
 	public class InsuredDto
 	{
@@ -10,6 +7,6 @@ namespace InsuranceApi.DTOs
 		public string Name { get; set; } = null!;
 		public DateTime Dob { get; set; }
 		public string Gender { get; set; } = null!;
-		public DateTime RegistrationDate { get; set; }
+		public DateTime RegistrationDate { get; set; } = DateTime.Now;
 	}
 }

@@ -1,0 +1,32 @@
+﻿@page "/PlansDetailBefore/{Id:int}"
+@using ClientApp.Services
+@using InsuranceApi.DTOs
+@inject IInsuranceTypeDtoService service
+<h3>Plan Details</h3>
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private InsuranceTypeDto InsuranceType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the insurance plan details based on the Id parameter
+        InsuranceType = await service.GetById(Id);
+    }
+ }
+
+
+
+@if (InsuranceType != null)
+ {
+   <div class="card">
+         <h4>@InsuranceType.InsuranceType</h4>
+         <p>@InsuranceType.Description</p>
+         <!-- add more details as needed -->
+     </div> 
+ }
+ else
+ {
+     <p>loading...</p>
+ }

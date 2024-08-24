@@ -1,5 +1,4 @@
 ﻿
-
 namespace InsuranceApi.DTOs
 {
     public class PaymentDto

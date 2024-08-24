@@ -1,5 +1,6 @@
 ﻿using InsuranceApi.DTOs;
 using InsuranceApi.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,13 +14,13 @@ namespace InsuranceApi.Controllers
         Task<IActionResult> GetById(int id);
         Task<IActionResult> Update(InsuredPolicyDto insuredPolicyDto);
     }
-
+    [EnableCors("cors")]
     [Route("api/[controller]")]
     [ApiController]
-    public class InsuredPolicyContoller : ControllerBase, IInsuredPolicyController
+    public class InsuredPolicyController : ControllerBase, IInsuredPolicyController
     {
         private readonly IInsuredPolicyService service;
-        public InsuredPolicyContoller(IInsuredPolicyService service)
+        public InsuredPolicyController(IInsuredPolicyService service)
         {
             this.service = service;
         }

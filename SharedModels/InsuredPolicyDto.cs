@@ -1,6 +1,4 @@
-﻿
-
-namespace InsuranceApi.DTOs
+﻿namespace InsuranceApi.DTOs
 {
     public class InsuredPolicyDto
     {
@@ -10,6 +8,6 @@ namespace InsuranceApi.DTOs
         public string ApprovalStatus { get; set; } = null!;
         public string RenewalStatus { get; set; } = null!;
         public int AdminId { get; set; }
-        public DateTime ApprovalDate { get; set; }
+        public DateTime? ApprovalDate { get; set; }
     }
 }

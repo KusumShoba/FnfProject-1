@@ -1,27 +1,28 @@
 ﻿using InsuranceApi.Data;
 using InsuranceApi.DTOs;
 using InsuranceApi.Services;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace InsuranceApi.Controllers
 {
-    public interface IAdminController
+    public interface IInsuredIllnessController
     {
-        Task<IActionResult> Add(AdminDto admin);
+        Task<IActionResult> Add(InsuredIllnessDto admin);
         Task<IActionResult> Delete(int id);
         Task<IActionResult> GetAll();
         Task<IActionResult> GetById(int id);
-        Task<IActionResult> Update(AdminDto admin);
+        Task<IActionResult> Update(InsuredIllnessDto admin);
     }
-
+    [EnableCors("cors")]
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminController : ControllerBase, IAdminController
+    public class InsuredIllnessController : ControllerBase, IInsuredIllnessController
     {
-        private readonly IAdminService service;
-        public AdminController(IAdminService service)
+        private readonly IInsuredIllnessService service;
+        public InsuredIllnessController(IInsuredIllnessService service)
         {
             this.service = service;
         }
@@ -29,7 +30,7 @@ namespace InsuranceApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
-            List<AdminDto> admins = await service.GetAll();
+            List<InsuredIllnessDto> admins = await service.GetAll();
             return Ok(admins);
         }
 
@@ -49,14 +50,14 @@ namespace InsuranceApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Add(AdminDto admin)
+        public async Task<IActionResult> Add(InsuredIllnessDto admin)
         {
                 await service.Add(admin);
                 return Ok();
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update(AdminDto admin)
+        public async Task<IActionResult> Update(InsuredIllnessDto admin)
         {
             try
             {

@@ -11,5 +11,9 @@ public partial class InsuranceType
 
     public string Description { get; set; } = null!;
 
+    public decimal? BaseRate { get; set; }
+
+    public int? CoverageSize { get; set; }
+
     public virtual ICollection<Policy> Policies { get; set; } = new List<Policy>();
 }

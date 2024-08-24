@@ -14,18 +14,18 @@ namespace InsuranceApi.Controllers
         Task<IActionResult> GetById(int id);
         Task<IActionResult> Update(PolicyHolderDto policyHolderDto);
     }
-
+    [EnableCors("cors")]
     [Route("api/[controller]")]
     [ApiController]
-    [EnableCors("cors")]
-    public class PolicyHolderContoller : ControllerBase, IPolicyHolderController
+ 
+    public class PolicyHolderController : ControllerBase, IPolicyHolderController
     {
         private readonly IPolicyHolderService service;
-        public PolicyHolderContoller(IPolicyHolderService service)
+        public PolicyHolderController(IPolicyHolderService service)
         {
             this.service = service;
         }
-
+       
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -83,6 +83,20 @@ namespace InsuranceApi.Controllers
                 return NotFound();
             }
         }
+        [HttpPost("authenticate")]
+        public async Task<IActionResult> Authenticate([FromBody] LoginDto loginModel)
+        {
+            var user = await service.ValidateUser(loginModel.Email, loginModel.PasswordHash);
+
+            if (user == null)
+            {
+                // Optional: Generate a token if you're using JWT
+                return Unauthorized();
+            }
+
+            return Ok(user);
+        }
     }
 }
+
 
