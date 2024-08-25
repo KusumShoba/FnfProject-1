@@ -159,7 +159,7 @@
 		calculatePremium = CalculatePremium();
 	}
 
-	private async Task SaveInsuredDetailsAsync(int insuranceId)
+	private int SaveInsuredDetailsAsync(int insuranceId)
 	{
 		if (insuranceId > 0)
 		{// Save to the Policy table
@@ -173,13 +173,15 @@
 					PremiumAmount =CalculatePremium()
 				};
 
-			await PolicyService.Add(policy);
+		 PolicyService.Add(policy);
 		}
+		return policy.PolicyId;
 	}
 	private async Task BuyPlan(int insuranceId)
 	{
 
-		await SaveInsuredDetailsAsync(insuranceId);
+		var policyid= SaveInsuredDetailsAsync(insuranceId);
+
 		foreach (var insured in insuredDetailsList)
 		{
 			insured.PolicyHolderId = HolderId; // Ensure this is set correctly
@@ -194,7 +196,7 @@
 			{
 
 
-				insuredPolicy.PolicyId = policy.PolicyId;
+				insuredPolicy.PolicyId = policyid;
 				// Use the saved InsuredID
 				insuredPolicy.InsuredId = insured.InsuredId;
 				insuredPolicy.ApprovalDate = DateTime.Now;
