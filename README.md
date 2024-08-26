@@ -88,7 +88,8 @@
             }
 
             <!-- Submit Buttons -->
-            <button type="submit" class="btn btn-primary">Check Premium</button>
+            <button type="submit" class="btn btn-primary"  @onclick="() => PoliCyUpdate(InsuranceType?.InsuranceId ?? 0)">Check Premium</button>
+
             <button type="button" class="btn btn-success" @onclick="() => BuyPlan(InsuranceType?.InsuranceId ?? 0)">Buy Plan</button>
         </EditForm>
     </div>
@@ -136,6 +137,35 @@
             new HealthFactor { Name = "Cancer", Value = 0.02m },
             new HealthFactor { Name = "None", Value = 0.00m }
         };
+
+
+    }
+    private async Task PoliCyUpdate(int insuranceId)
+    {
+        foreach (var insured in insuredDetailsList)
+        {
+            // Ensure the InsuredDto details are set correctly
+            insured.PolicyHolderId = HolderId; // Ensure this is set correctly
+            insured.RegistrationDate = DateTime.Now; // Set registration date
+            await service.Add(insured); // Save to the Insured table
+        }
+
+
+            if (insuranceId > 0)
+            {
+                policy = new PolicyDto
+                    {
+                        PolicyNumber = GeneratePolicyNumber(HolderId, insuranceId),
+                        InsuranceTypeId = insuranceId,
+                        StartDate = DateTime.Today,
+                        EndDate = DateTime.Today.AddYears(1),
+                        PremiumAmount = CalculatePremium()
+                    };
+
+                await PolicyService.Add(policy);
+            }
+       
+       
     }
 
     private void UpdateInsuredDetails()
@@ -155,38 +185,17 @@
         calculatePremium = CalculatePremium();
     }
 
-    private async Task SaveInsuredDetailsAsync(int insuranceId)
-    {
-        if (insuranceId > 0)
-        {
-            policy = new PolicyDto
-                {
-                    PolicyNumber = GeneratePolicyNumber(HolderId, insuranceId),
-                    InsuranceTypeId = insuranceId,
-                    StartDate = DateTime.Today,
-                    EndDate = DateTime.Today.AddYears(1),
-                    PremiumAmount = CalculatePremium()
-                };
-
-            await PolicyService.Add(policy);
-        }
-
-   
-    }
-
     private async Task BuyPlan(int insuranceId)
     {
-        await SaveInsuredDetailsAsync(insuranceId);
+        // Save the policy details
+    
 
-        for (int i = 0; i < insuredDetailsList.Count; i++)
+        // Process each insured and create associated InsuredPolicyDto entries
+        foreach (var insured in insuredDetailsList)
         {
-            var insured = insuredDetailsList[i];
-            insured.PolicyHolderId = HolderId; // Ensure this is set correctly
-            insured.RegistrationDate = DateTime.Now; // Set registration date
-            await service.Add(insured); // Save to the Insured table
 
-            // Create and save InsuredPolicy
-            var insuredPolicy = new InsuredPolicyDto
+            // Create and save InsuredPolicyDto
+            var insuredPolicy = new InsuredPolicyDto()
                 {
                     PolicyId = policy.PolicyId, // Ensure the PolicyId is set correctly
                     InsuredId = insured.InsuredId, // Use the saved InsuredID
@@ -203,6 +212,7 @@
         // Navigate to another page or perform any other action after saving
         nav.NavigateTo($"/BuyPlan/{HolderId}/{insuranceId}/{calculatePremium}");
     }
+
 
 
     private decimal CalculatePremium()
