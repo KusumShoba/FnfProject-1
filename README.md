@@ -1,4 +1,4 @@
-@page "/PlansDetailAfter/{Id:int}"
+@page "/PlansDetailAfter/{Id:int}/{insureceTypeId:int}"
 
 @using ClientApp.Services
 @using InsuranceApi.DTOs
@@ -8,6 +8,7 @@
 @inject NavigationManager nav
 @inject IJSRuntime js
 @inject IPolicyDtoService policyservice
+
 <div class="card mt-4">
     <div class="card-header">
         Insurance Plan
@@ -95,28 +96,33 @@
         Estimated Premium: @calculatePremium.Value.ToString("C")
     </div>
 }
+
 @code {
-    [Parameter] 
-    public int Id{ get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    [Parameter]
+    public int insureceTypeId{ get; set; }
     private List<HealthFactor> healthFactors;
     private List<InsuredDto> insuredDetailsList = new List<InsuredDto>();
     private PremiumModel premiumModel = new PremiumModel();
     private PolicyDto policy;
     private InsuranceTypeDto InsuranceType;
     private PolicyHolderDto policyHolder;
-  
+    private decimal? calculatePremium;  // Declaring as nullable decimal
+
     protected override async Task OnInitializedAsync()
     {
-        var insuranceType = await InsuranceService.GetById(Id);
+        InsuranceType = await InsuranceService.GetById(insureceTypeId);
 
-        if (insuranceType != null)
+        if (InsuranceType != null)
         {
-            premiumModel.BaseRate = insuranceType.BaseRate ?? 0m;
-            premiumModel.CoverageSize = insuranceType.CoverageSize ?? 0;
+            premiumModel.BaseRate = InsuranceType.BaseRate ?? 0m;
+            premiumModel.CoverageSize = InsuranceType.CoverageSize ?? 0;
 
             UpdateInsuredDetails();
             InitializeHealthFactors();
         }
+
     }
 
     private void InitializeHealthFactors()
@@ -145,42 +151,37 @@
 
     private async Task HandleValidSubmit()
     {
-        foreach (var insured in insuredDetailsList)
-        {
-            insured.PolicyHolderId = Id; // Ensure this is set correctly
-            insured.RegistrationDate = DateTime.Now; // Set registration date
-            await service.Add(insured); // Save to the Insured table
+        calculatePremium = CalculatePremium();  // Assign calculated premium to the class-level property
 
-            // Create and save InsuredPolicy
-          
-        }
-
-        // Calculate premium
-        var calculatePremium = CalculatePremium();
-    }
-
-    private async Task SaveInsuredDetailsAsync(int insuranceId)
-    {
-        if (insuranceId > 0)
+        if (insureceTypeId > 0)
         {
             policy = new PolicyDto
                 {
-                    PolicyNumber = GeneratePolicyNumber(Id, insuranceId),
-                    InsuranceTypeId = insuranceId,
+                    PolicyNumber = GeneratePolicyNumber(Id, insureceTypeId),
+                    InsuranceTypeId = insureceTypeId,
                     StartDate = DateTime.Today,
                     EndDate = DateTime.Today.AddYears(1),
-                    PremiumAmount = CalculatePremium()
+                    PremiumAmount = calculatePremium ?? 0  // Use class-level property for premium
                 };
 
             await policyservice.Add(policy);
         }
+        
     }
 
-    private async Task BuyPlan(int insuranceId)
+
+    private async Task BuyPlan(int insureceTypeId)
     {
-        // Save insured details and premium information to the database
-        await SaveInsuredDetailsAsync(insuranceId);
-        nav.NavigateTo($"/BuyPlan/{Id}/{insuranceId}/{CalculatePremium()}");
+        foreach (var insured in insuredDetailsList)
+        {
+            insured.PolicyHolderId = Id;  // Ensure this is set correctly
+            insured.RegistrationDate = DateTime.Now;  // Set registration date
+            await service.Add(insured);  // Save to the Insured table
+        }
+
+     
+
+        nav.NavigateTo($"/BuyPlan/{Id}/{insureceTypeId}/{policy.PolicyNumber}/{calculatePremium}");  // Use class-level property for premium
     }
 
     private decimal CalculatePremium()
@@ -199,10 +200,9 @@
         return premium;
     }
 
-    // Generate Policy Number
-    private string GeneratePolicyNumber(int insuredId, int insuranceId)
+    private string GeneratePolicyNumber(int Id, int insuranceId)
     {
-        return $"{insuredId:D3}-{insuranceId:D3}";
+        return $"{Id:D3}-{insuranceId:D3}";
     }
 
     public class PremiumModel
